@@ -1,0 +1,19 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "qtads-dap",
+  "version": "0.1.0",
+  "dependencies": [
+    {
+      "name": "qtbase",
+      "version>=": "6.5.0",
+      "default-features": false,
+      "features": [ "gui", "network", "widgets" ]
+    },
+    {
+      "name": "qtsvg",
+      "version>=": "6.3.2",
+      "default-features": false
+    }
+  ],
+  "builtin-baseline": "288e8bebf4ca67c1f8ebd49366b03650cfd9eb7d"
+}

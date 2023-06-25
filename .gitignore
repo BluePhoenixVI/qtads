@@ -10,3 +10,6 @@
 /qtads.pro.user*
 /qrc_resources.cpp
 /.qmake.stash
+/.vs
+/build
+/out/build/x64-Debug
