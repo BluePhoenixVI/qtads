@@ -177,8 +177,11 @@ extern "C" {
 #      define NORETURN
 #    endif
 #  elif __STDC_VERSION__ >= 201112L
-#    include <stdnoreturn.h>
-#    define NORETURN noreturn
+// HACK: Disable as CMake's CLang compiles compiles each file seperatly, and .c files that include this one
+// will wind up defining noreturn and cause a compile error in '\MSVC\14.36.32532\include\setjmp.h'
+//#    include <stdnoreturn.h>
+//#    define NORETURN noreturn
+#    define NORETURN [[noreturn]]
 #  else
 #    define NORETURN
 #  endif

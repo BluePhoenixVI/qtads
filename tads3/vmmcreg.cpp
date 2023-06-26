@@ -1,13 +1,13 @@
 #ifdef RCSID
 static char RCSid[] =
-"$Header: d:/cvsroot/tads/tads3/VMMCREG.CPP,v 1.2 1999/05/17 02:52:28 MJRoberts Exp $";
+    "$Header: d:/cvsroot/tads/tads3/VMMCREG.CPP,v 1.2 1999/05/17 02:52:28 MJRoberts Exp $";
 #endif
 
-/* 
+/*
  *   Copyright (c) 1998, 2002 Michael J. Roberts.  All Rights Reserved.
- *   
+ *
  *   Please see the accompanying license file, LICENSE.TXT, for information
- *   on using and copying this software.  
+ *   on using and copying this software.
  */
 /*
 Name
@@ -34,7 +34,7 @@ Function
       you should still include "vmmccore.h", which takes care of
       including the core files.)
 Notes
-  
+
 Modified
   12/01/98 MJRoberts  - Creation
 */
@@ -44,75 +44,41 @@ Modified
 // !!! INCLUDE HOST-SPECIFIC METACLASS HEADERS HERE (FIRST OF TWO)
 
 /* the global registry table */
-#define VM_REGISTER_METACLASS(meta_class) {&meta_class::metaclass_reg_},
+vm_meta_reg_t G_meta_reg_table[] = {
+/*
+ *   enable table-building mode, and include the core metaclasses
+ *   common to all T3 VM implementations
+ */
+#define VMMCCORE_BUILD_TABLE
+#include "vmmccore.h"
 
-vm_meta_reg_t G_meta_reg_table[] =
-{
+    // !!! INCLUDE HOST-SPECIFIC METACLASS HEADERS HERE (SECOND OF TWO)
 
-// HACK: Form some reason, the MSVC compiler refuses to include a header file more than once.
-// necessitating the macros that add the metaobjects be moved to here
-
-VM_REGISTER_METACLASS(CVmObjAnonFn)
-VM_REGISTER_METACLASS(CVmObjBigNum)
-VM_REGISTER_METACLASS(CVmObjByteArray)
-VM_REGISTER_METACLASS(CVmObjCollection)
-VM_REGISTER_METACLASS(CVmObjCharSet)
-VM_REGISTER_METACLASS(CVmObjDate)
-VM_REGISTER_METACLASS(CVmObjDict)
-VM_REGISTER_METACLASS(CVmDynamicFunc)
-VM_REGISTER_METACLASS(CVmObjFileName)
-VM_REGISTER_METACLASS(CVmObjFile)
-VM_REGISTER_METACLASS(CVmObjFrameRef)
-VM_REGISTER_METACLASS(CVmObjFrameDesc)
-VM_REGISTER_METACLASS(CVmObjGramProd)
-VM_REGISTER_METACLASS(CVmObjClass)
-VM_REGISTER_METACLASS(CVmObjIter)
-VM_REGISTER_METACLASS(CVmObjIterIdx)
-VM_REGISTER_METACLASS(CVmObjLookupTable)
-VM_REGISTER_METACLASS(CVmObjWeakRefLookupTable)
-VM_REGISTER_METACLASS(CVmObjIterLookupTable)
-VM_REGISTER_METACLASS(CVmObjList)
-VM_REGISTER_METACLASS(CVmObject)
-VM_REGISTER_METACLASS(CVmObjPattern)
-VM_REGISTER_METACLASS(CVmObjString)
-VM_REGISTER_METACLASS(CVmObjStringBuffer)
-VM_REGISTER_METACLASS(CVmObjStrComp)
-VM_REGISTER_METACLASS(CVmObjTemporaryFile)
-VM_REGISTER_METACLASS(CVmObjTads)
-VM_REGISTER_METACLASS(CVmObjIntClsMod)
-VM_REGISTER_METACLASS(CVmObjTimeZone)
-VM_REGISTER_METACLASS(CVmObjVector)
-
-// !!! INCLUDE HOST-SPECIFIC METACLASS HEADERS HERE (SECOND OF TWO)
-
-    /* 
+    /*
      *   last entry in the table (this is only required because of the
-     *   trailing comma in the registration macro) 
+     *   trailing comma in the registration macro)
      */
-    { 0 }
-};
+    {0}};
 
 /* ------------------------------------------------------------------------ */
 /*
- *   Register the metaclasses 
+ *   Register the metaclasses
  */
 void vm_register_metaclasses()
 {
     uint i;
-    vm_meta_reg_t *entry;
-    
-    /* 
+    vm_meta_reg_t* entry;
+
+    /*
      *   run through the metaclass table and tell each metaclass its
-     *   registration table index 
+     *   registration table index
      */
-    for (i = 0, entry = G_meta_reg_table ; entry->meta != 0 ;
-         ++i, ++entry)
-    {
-        /* 
+    for (i = 0, entry = G_meta_reg_table; entry->meta != 0; ++i, ++entry) {
+        /*
          *   Call this entry's class method to set its registration index.
          *   This is static information that never changes throughout the
          *   program's execution - we simply establish the registration
-         *   table index for each metaclass once upon initialization.  
+         *   table index for each metaclass once upon initialization.
          */
         (*entry->meta)->set_metaclass_reg_index(i);
     }

@@ -1,12 +1,12 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.21)
 set(VCPKG_TARGET_TRIPLET x64-windows)
 project(qtads VERSION "3.4" LANGUAGES C CXX)
 
 set(CMAKE_C_EXTENSIONS OFF)
-set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_TOOLCHAIN_FILE on)
 
@@ -19,7 +19,6 @@ set(DISABLEAUDIO ON)
 
 find_package(QT NAMES Qt5 REQUIRED COMPONENTS Core)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Gui Network Widgets)
-
 
 #qt_add_executable(qtads WIN32 MACOSX_BUNDLE
 add_executable(qtads WIN32 
@@ -214,6 +213,16 @@ add_executable(qtads WIN32
     tads3/vmundo.cpp
     tads3/vmvec.cpp
 )
+
+set_target_properties(qtads PROPERTIES C_STANDARD 17)
+set_target_properties(qtads PROPERTIES C_STANDARD_REQUIRED ON)
+set_target_properties(qtads PROPERTIES C_EXTENSIONS OFF)
+set_target_properties(qtads PROPERTIES CXX_STANDARD 20)
+set_target_properties(qtads PROPERTIES CXX_STANDARD_REQUIRED ON)
+set_target_properties(qtads PROPERTIES CXX_EXTENSIONS OFF)
+
+
+
 target_include_directories(qtads PRIVATE
     htmltads
     src
