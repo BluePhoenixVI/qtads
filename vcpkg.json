@@ -12,7 +12,7 @@
     {
       "name": "qtsvg",
       "version>=": "6.3.2",
-      "default-features": false
+      "default-features": true
     }
   ],
   "builtin-baseline": "288e8bebf4ca67c1f8ebd49366b03650cfd9eb7d"
