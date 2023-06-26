@@ -1,19 +1,30 @@
-cmake_minimum_required(VERSION 3.19)
-set(VCPKG_TARGET_TRIPLET x64-windows-static)
+cmake_minimum_required(VERSION 3.20)
+set(VCPKG_TARGET_TRIPLET x64-windows)
 project(qtads VERSION "3.4" LANGUAGES C CXX)
 
+set(CMAKE_C_EXTENSIONS OFF)
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_TOOLCHAIN_FILE on)
 
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(QT NAMES Qt5 Qt6 REQUIRED COMPONENTS Core)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Gui Network Svg Widgets)
+set(DISABLEAUDIO ON)
 
-qt_standard_project_setup()
 
-qt_add_executable(qtads WIN32 MACOSX_BUNDLE
-    htmltads/*.h
+find_package(QT NAMES Qt5 REQUIRED COMPONENTS Core)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Gui Network Widgets)
+
+
+#qt_add_executable(qtads WIN32 MACOSX_BUNDLE
+add_executable(qtads WIN32 
+    ${UI_SOURCES}
+    ${HDR_SOURCES}
     htmltads/htmldisp.cpp
     htmltads/htmlfmt.cpp
     htmltads/htmlhash.cpp
@@ -63,7 +74,6 @@ qt_add_executable(qtads WIN32 MACOSX_BUNDLE
     src/syswingroup.cc src/syswingroup.h
     src/syswininput.cc src/syswininput.h
     src/util.cc src/util.h
-    tads2/*.h
     tads2/argize.c
     tads2/askf_os.c
     tads2/bif.c
@@ -101,7 +111,6 @@ qt_add_executable(qtads WIN32 MACOSX_BUNDLE
     tads2/trd.c
     tads2/voc.c
     tads2/vocab.c
-    tads3/*.h
     tads3/askf_os3.cpp
     tads3/charmap.cpp
     tads3/derived/vmuni_cs.cpp
@@ -214,7 +223,7 @@ target_include_directories(qtads PRIVATE
 
 target_compile_definitions(qtads PRIVATE
     QTADS
-    QTADS_VERSION=\\\"3\\\"
+    QTADS_VERSION="\\\"3.0.0\\\""
     QT_DEPRECATED_WARNINGS
     QT_DISABLE_DEPRECATED_BEFORE=0x050A00
     QT_NO_CAST_TO_ASCII
@@ -232,7 +241,6 @@ target_link_libraries(qtads PRIVATE
     Qt::Core
     Qt::Gui
     Qt::Network
-    Qt::Svg
     Qt::Widgets
 )
 
@@ -245,24 +253,17 @@ set(resources_resource_files
     "soundfont.sf2"
 )
 
-qt_add_resources(qtads "resources"
-    PREFIX
-        "/"
-    FILES
-        ${resources_resource_files}
-)
-
-if(((QT_VERSION_MAJOR EQUAL 5)) AND ((QT_VERSION_MINOR LESS 6)))
-    target_compile_options(qtads
-        -std=c++1z
-    )
-endif()
+#qt_add_resources(qtads "resources"
+#    PREFIX
+#        "/"
+#    FILES
+#        ${resources_resource_files}
+#)
 
 if(WIN32)
     target_sources(qtads PUBLIC
         tads2/msdos/ostzw32.c
     )
-
     target_include_directories(qtads PRIVATE
         tads2/msdos
     )
@@ -300,19 +301,15 @@ if(CLANG OR GCC)
     )
 endif()
 
-if(disable-audio)
+if(DISABLEAUDIO)
     target_compile_definitions(qtads PRIVATE
         NO_AUDIO
     )
 endif()
 
-if(NOT disable-audio)
+if(NOT DISABLEAUDIO)
     target_sources(qtads PUBLIC
-        SDL_audiolib/*.h
         SDL_audiolib/3rdparty/speex_resampler/resample.c
-        SDL_audiolib/include/*.h
-        SDL_audiolib/include/Aulib/*.h
-        SDL_audiolib/src/*.h
         SDL_audiolib/src/Decoder.cpp
         SDL_audiolib/src/DecoderFluidsynth.cpp
         SDL_audiolib/src/DecoderMpg123.cpp
@@ -323,7 +320,6 @@ if(NOT disable-audio)
         SDL_audiolib/src/ResamplerSpeex.cpp
         SDL_audiolib/src/Stream.cpp
         SDL_audiolib/src/aulib.cpp
-        SDL_audiolib/src/missing/*.h
         SDL_audiolib/src/missing/sdl_load_file_rw.c
         SDL_audiolib/src/sampleconv.cpp
         SDL_audiolib/src/stream_p.cpp
@@ -348,7 +344,7 @@ if(NOT disable-audio)
 endif()
 #		CMAKE_BUILD_TYPE_INIT	Debug	string
 
-if((NOT (disable-audio)) AND (CMAKE_BUILD_TYPE_INIT STREQUAL "Debug"))
+if((NOT DISABLEAUDIO) AND (CMAKE_BUILD_TYPE_INIT STREQUAL "Debug"))
     target_compile_definitions(qtads PRIVATE
         AULIB_DEBUG
     )
@@ -360,14 +356,12 @@ if(UNIX)
     )
 endif()
 
+
 install(TARGETS qtads
     BUNDLE DESTINATION .
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
-qt_generate_deploy_app_script(
-    TARGET qtads
-    FILENAME_VARIABLE deploy_script
-    NO_UNSUPPORTED_PLATFORM_ERROR
-)
-install(SCRIPT ${deploy_script})
+if (CMAKE_CXX_STANDARD LESS 20)
+    message(STATUS "-------------------------------- ERROR: CMAKE_CXX_STANDARD RESET! .")
+endif ()

@@ -20,7 +20,6 @@ extern "C" {
  */
 #ifndef _WIN32
 int memicmp(const char* s1, const char* s2, size_t len);
-#endif
 
 /* Case-insensitive string comparison.
  */
@@ -32,6 +31,7 @@ int stricmp(const char* s1, const char* s2);
  * character has been detected.
  */
 int strnicmp(const char* s1, const char* s2, size_t n);
+#endif
 
 #ifdef __cplusplus
 } /* extern "C" */

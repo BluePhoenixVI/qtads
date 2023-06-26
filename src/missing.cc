@@ -29,7 +29,6 @@ auto memicmp(const char* const s1, const char* const s2, const size_t len) -> in
     }
     return 0;
 }
-#endif
 
 auto stricmp(const char* const s1, const char* const s2) -> int
 {
@@ -40,6 +39,7 @@ auto strnicmp(const char* const s1, const char* const s2, const size_t n) -> int
 {
     return qstrnicmp(s1, s2, n);
 }
+#endif
 
 /*
     Copyright 2003-2020 Nikos Chantziaras <realnc@gmail.com>

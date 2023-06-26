@@ -44,14 +44,44 @@ Modified
 // !!! INCLUDE HOST-SPECIFIC METACLASS HEADERS HERE (FIRST OF TWO)
 
 /* the global registry table */
+#define VM_REGISTER_METACLASS(meta_class) {&meta_class::metaclass_reg_},
+
 vm_meta_reg_t G_meta_reg_table[] =
 {
-    /* 
-     *   enable table-building mode, and include the core metaclasses
-     *   common to all T3 VM implementations 
-     */
-#define VMMCCORE_BUILD_TABLE
-#include "vmmccore.h"
+
+// HACK: Form some reason, the MSVC compiler refuses to include a header file more than once.
+// necessitating the macros that add the metaobjects be moved to here
+
+VM_REGISTER_METACLASS(CVmObjAnonFn)
+VM_REGISTER_METACLASS(CVmObjBigNum)
+VM_REGISTER_METACLASS(CVmObjByteArray)
+VM_REGISTER_METACLASS(CVmObjCollection)
+VM_REGISTER_METACLASS(CVmObjCharSet)
+VM_REGISTER_METACLASS(CVmObjDate)
+VM_REGISTER_METACLASS(CVmObjDict)
+VM_REGISTER_METACLASS(CVmDynamicFunc)
+VM_REGISTER_METACLASS(CVmObjFileName)
+VM_REGISTER_METACLASS(CVmObjFile)
+VM_REGISTER_METACLASS(CVmObjFrameRef)
+VM_REGISTER_METACLASS(CVmObjFrameDesc)
+VM_REGISTER_METACLASS(CVmObjGramProd)
+VM_REGISTER_METACLASS(CVmObjClass)
+VM_REGISTER_METACLASS(CVmObjIter)
+VM_REGISTER_METACLASS(CVmObjIterIdx)
+VM_REGISTER_METACLASS(CVmObjLookupTable)
+VM_REGISTER_METACLASS(CVmObjWeakRefLookupTable)
+VM_REGISTER_METACLASS(CVmObjIterLookupTable)
+VM_REGISTER_METACLASS(CVmObjList)
+VM_REGISTER_METACLASS(CVmObject)
+VM_REGISTER_METACLASS(CVmObjPattern)
+VM_REGISTER_METACLASS(CVmObjString)
+VM_REGISTER_METACLASS(CVmObjStringBuffer)
+VM_REGISTER_METACLASS(CVmObjStrComp)
+VM_REGISTER_METACLASS(CVmObjTemporaryFile)
+VM_REGISTER_METACLASS(CVmObjTads)
+VM_REGISTER_METACLASS(CVmObjIntClsMod)
+VM_REGISTER_METACLASS(CVmObjTimeZone)
+VM_REGISTER_METACLASS(CVmObjVector)
 
 // !!! INCLUDE HOST-SPECIFIC METACLASS HEADERS HERE (SECOND OF TWO)
 

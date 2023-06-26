@@ -27,6 +27,7 @@
 #include "sysframe.h"
 #include "syswininput.h"
 #include "util.h"
+#include "..\tads3\t3std.h" // HACK: needed for os_init_after_load
 #include <QApplication>
 #include <QDebug>
 #include <QDir>
@@ -1236,8 +1237,8 @@ auto os_vasprintf(char** const bufptr, const char* const fmt, va_list ap) -> int
 {
     Q_ASSERT(bufptr != nullptr);
     Q_ASSERT(fmt != nullptr);
-
-    return vasprintf(bufptr, fmt, ap);
+    // HACK: Remove
+    return 0; // vasprintf(bufptr, fmt, ap);
 }
 
 /* --------------------------------------------------------------------
