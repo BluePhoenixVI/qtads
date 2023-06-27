@@ -20,6 +20,7 @@ set(DISABLEAUDIO ON)
 find_package(QT NAMES Qt5 REQUIRED COMPONENTS Core)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Gui Network Widgets)
 
+set(APP_ICON_RESOURCE_WINDOWS "resources.qrc")
 #qt_add_executable(qtads WIN32 MACOSX_BUNDLE
 add_executable(qtads WIN32 
     ${UI_SOURCES}
@@ -212,6 +213,7 @@ add_executable(qtads WIN32
     tads3/vmtzobj.cpp
     tads3/vmundo.cpp
     tads3/vmvec.cpp
+    resources.rc
 )
 
 set_target_properties(qtads PROPERTIES C_STANDARD 17)
@@ -232,7 +234,7 @@ target_include_directories(qtads PRIVATE
 
 target_compile_definitions(qtads PRIVATE
     QTADS
-    QTADS_VERSION="\\\"3.0.0\\\""
+    QTADS_VERSION="\\\"3.4.0\\\""
     QT_DEPRECATED_WARNINGS
     QT_DISABLE_DEPRECATED_BEFORE=0x050A00
     QT_NO_CAST_TO_ASCII
@@ -261,7 +263,6 @@ set(resources_resource_files
     "qtads_72x72.png"
     "soundfont.sf2"
 )
-
 #qt_add_resources(qtads "resources"
 #    PREFIX
 #        "/"
