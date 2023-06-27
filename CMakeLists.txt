@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-set(VCPKG_TARGET_TRIPLET x64-windows)
+set(VCPKG_TARGET_TRIPLET x64-windows-static)
 project(qtads VERSION "3.4" LANGUAGES C CXX)
 
 # Use a toolmake chain file
@@ -21,6 +21,12 @@ set(CMAKE_AUTOUIC ON)
 # Audio is unsupported, for now
 set(DISABLEAUDIO ON)
 
+# Global flag for enabling the dap extensions
+set(ENABLE_DAP ON)
+
+# Use the non-dll runtime, with a generator expression to select the debug version for debug builds
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+
 # Find Qt5
 find_package(QT NAMES Qt5 REQUIRED COMPONENTS Core)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Gui Network Widgets)
@@ -28,15 +34,8 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Gui Network Widgets)
 # Include the qrc file so the qt windows can find the QTads icon
 set(APP_ICON_RESOURCE_WINDOWS "resources.qrc")
 
-
-
-
-
-
-
-
-
-
+# Add ALL sources needed to compile QTads.
+# For now, they are in one big block.
 #qt_add_executable(qtads WIN32 MACOSX_BUNDLE
 add_executable(qtads WIN32 
     ${UI_SOURCES}
@@ -232,9 +231,7 @@ add_executable(qtads WIN32
     resources.rc
 )
 
-
-
-
+# Include directories for the headers. Matching the pro file, we just include ALL header files
 target_include_directories(qtads PRIVATE
     htmltads
     src
@@ -242,6 +239,7 @@ target_include_directories(qtads PRIVATE
     tads3
 )
 
+# Compile time definitions. Some are for tads, others are for qt5
 target_compile_definitions(qtads PRIVATE
     QTADS
     QTADS_VERSION="\\\"3.4.0\\\""
@@ -258,27 +256,13 @@ target_compile_definitions(qtads PRIVATE
     _M_LE_C11
 )
 
+# Add the Qt5 libraries
 target_link_libraries(qtads PRIVATE
     Qt::Core
     Qt::Gui
     Qt::Network
     Qt::Widgets
 )
-
-
-# Resources:
-set(resources_resource_files
-    "qtads-logo.png"
-    "qtads_48x48.png"
-    "qtads_72x72.png"
-    "soundfont.sf2"
-)
-#qt_add_resources(qtads "resources"
-#    PREFIX
-#        "/"
-#    FILES
-#        ${resources_resource_files}
-#)
 
 if(WIN32)
     target_sources(qtads PUBLIC
@@ -321,6 +305,7 @@ if(CLANG OR GCC)
     )
 endif()
 
+
 if(DISABLEAUDIO)
     target_compile_definitions(qtads PRIVATE
         NO_AUDIO
@@ -362,7 +347,6 @@ if(NOT DISABLEAUDIO)
         SPX_RESAMPLE_EXPORT=
     )
 endif()
-#		CMAKE_BUILD_TYPE_INIT	Debug	string
 
 if((NOT DISABLEAUDIO) AND (CMAKE_BUILD_TYPE_INIT STREQUAL "Debug"))
     target_compile_definitions(qtads PRIVATE
@@ -370,18 +354,14 @@ if((NOT DISABLEAUDIO) AND (CMAKE_BUILD_TYPE_INIT STREQUAL "Debug"))
     )
 endif()
 
+
 if(UNIX)
     target_sources(qtads PUBLIC
         tads2/ostzposix.c
     )
 endif()
 
-
 install(TARGETS qtads
     BUNDLE DESTINATION .
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
-
-if (CMAKE_CXX_STANDARD LESS 20)
-    message(STATUS "-------------------------------- ERROR: CMAKE_CXX_STANDARD RESET! .")
-endif ()
