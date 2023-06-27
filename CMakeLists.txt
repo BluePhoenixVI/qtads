@@ -2,25 +2,41 @@ cmake_minimum_required(VERSION 3.21)
 set(VCPKG_TARGET_TRIPLET x64-windows)
 project(qtads VERSION "3.4" LANGUAGES C CXX)
 
+# Use a toolmake chain file
+set(CMAKE_TOOLCHAIN_FILE on)
+
+# Setup the C and C++ language versions, set them as required, and disable compiler language extensions
 set(CMAKE_C_EXTENSIONS OFF)
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_TOOLCHAIN_FILE on)
 
+# Instruct cmake to use moc, rcc, and uic for targets that require them
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
+# Audio is unsupported, for now
 set(DISABLEAUDIO ON)
 
-
+# Find Qt5
 find_package(QT NAMES Qt5 REQUIRED COMPONENTS Core)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Gui Network Widgets)
 
+# Include the qrc file so the qt windows can find the QTads icon
 set(APP_ICON_RESOURCE_WINDOWS "resources.qrc")
+
+
+
+
+
+
+
+
+
+
 #qt_add_executable(qtads WIN32 MACOSX_BUNDLE
 add_executable(qtads WIN32 
     ${UI_SOURCES}
@@ -216,12 +232,6 @@ add_executable(qtads WIN32
     resources.rc
 )
 
-set_target_properties(qtads PROPERTIES C_STANDARD 17)
-set_target_properties(qtads PROPERTIES C_STANDARD_REQUIRED ON)
-set_target_properties(qtads PROPERTIES C_EXTENSIONS OFF)
-set_target_properties(qtads PROPERTIES CXX_STANDARD 20)
-set_target_properties(qtads PROPERTIES CXX_STANDARD_REQUIRED ON)
-set_target_properties(qtads PROPERTIES CXX_EXTENSIONS OFF)
 
 
 
