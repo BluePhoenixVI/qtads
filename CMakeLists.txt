@@ -30,9 +30,12 @@ set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 # Find Qt5
 find_package(QT NAMES Qt5 REQUIRED COMPONENTS Core)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Gui Network Widgets)
+#find_package(GTest REQUIRED)
 
 # Include the qrc file so the qt windows can find the QTads icon
 set(APP_ICON_RESOURCE_WINDOWS "resources.qrc")
+
+
 
 # Add ALL sources needed to compile QTads.
 # For now, they are in one big block.
@@ -165,7 +168,6 @@ add_executable(qtads WIN32
     tads3/vmbiftix.cpp
     tads3/vmbignum.cpp
     tads3/vmbignumlib.cpp
-    tads3/vmbt3_nd.cpp
     tads3/vmbytarr.cpp
     tads3/vmcfgfl.cpp
     tads3/vmcoll.cpp
@@ -188,8 +190,6 @@ add_executable(qtads WIN32
     tads3/vmgram.cpp
     tads3/vmhash.cpp
     tads3/vmimage.cpp
-    tads3/vmimg_nd.cpp
-    tads3/vmini_nd.cpp
     tads3/vminit.cpp
     tads3/vminitfl.cpp
     tads3/vmintcls.cpp
@@ -228,6 +228,11 @@ add_executable(qtads WIN32
     tads3/vmtzobj.cpp
     tads3/vmundo.cpp
     tads3/vmvec.cpp
+# DAP implementation: Conditionally add the debugging files for DAP builds 
+    $<$<BOOL:ENABLE_DAP>:tads3/vmdbg.cpp>
+    $<IF:$<BOOL:ENABLE_DAP>,tads3/vmbt3_d.cpp,tads3/vmbt3_nd.cpp>
+    $<IF:$<BOOL:ENABLE_DAP>,tads3/vmimg_d.cpp,tads3/vmimg_nd.cpp>
+    $<IF:$<BOOL:ENABLE_DAP>,tads3/vmini_d.cpp,tads3/vmini_nd.cpp>
     resources.rc
 )
 
@@ -238,6 +243,7 @@ target_include_directories(qtads PRIVATE
     tads2
     tads3
 )
+
 
 # Compile time definitions. Some are for tads, others are for qt5
 target_compile_definitions(qtads PRIVATE
@@ -272,6 +278,19 @@ if(WIN32)
         tads2/msdos
     )
 endif()
+
+# ------------------------------------------------------------------------------
+# DAP implementation: Define VM_DEBUGGER and VM_PROFILER for DAP builds 
+if(ENABLE_DAP)
+    target_compile_definitions(qtads PRIVATE
+        VM_DEBUGGER
+    )
+    # Add DAP Sources here:
+    target_sources(qtads PUBLIC
+        dap/dap.cpp
+    )
+endif()
+# ------------------------------------------------------------------------------
 
 if(GCC AND (TEST_architecture_arch STREQUAL "i386") AND WIN32)
     target_compile_options(qtads
@@ -365,3 +384,27 @@ install(TARGETS qtads
     BUNDLE DESTINATION .
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
+
+# Incluse the unit tests
+include(unittests/CMakeLists.txt)
+
+#enable_testing()
+#add_executable(Setup unittests/Setup.cpp)
+#target_link_libraries(Setup GTest::GTest GTest::Main)
+#
+#
+#if(CLANG OR GCC)
+#    target_compile_definitions(Setup PRIVATE
+#        _DEFAULT_SOURCE
+#        _SVID_SOURCE
+#    )
+#
+#    target_compile_options(Setup
+#        -fno-sized-deallocation
+#        -fno-strict-aliasing
+#    )
+#endif()
+#
+#
+#
+#gtest_discover_tests(Setup)

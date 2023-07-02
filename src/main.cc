@@ -34,6 +34,7 @@ auto main(int argc, char** argv) -> int
     // Filename of the game to run.
     QString gameFileName;
 
+    // TODO: Implement the diversion here
     const QStringList& args = app->arguments();
     if (args.size() == 2) {
         if (QFile::exists(args.at(1))) {
