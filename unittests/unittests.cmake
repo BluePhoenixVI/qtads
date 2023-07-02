@@ -3,6 +3,7 @@
 # ----------------------------------------------------------
 # Include the google test package
 find_package(GTest REQUIRED)
+# set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 # Enable the unit tests
 enable_testing()
 # Add the files containing the unit tests

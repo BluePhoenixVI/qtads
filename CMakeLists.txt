@@ -2,6 +2,12 @@ cmake_minimum_required(VERSION 3.21)
 set(VCPKG_TARGET_TRIPLET x64-windows-static)
 project(qtads VERSION "3.4" LANGUAGES C CXX)
 
+# Audio is unsupported, for now
+set(DISABLEAUDIO ON)
+
+# Global flag for enabling the dap extensions
+set(ENABLE_DAP ON)
+
 # Use a toolmake chain file
 set(CMAKE_TOOLCHAIN_FILE on)
 
@@ -19,29 +25,58 @@ set(CMAKE_WARN_DEPRECATED FALSE)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
-
-# Audio is unsupported, for now
-set(DISABLEAUDIO ON)
-
-# Global flag for enabling the dap extensions
-set(ENABLE_DAP ON)
+# Include the qrc file so qt5 can find the QTads icon
+set(APP_ICON_RESOURCE_WINDOWS "resources.qrc")
 
 # Use the non-dll runtime, with a generator expression to select the debug version for debug builds
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
+# ----------------------------------------------------------
+# Packages
+# ----------------------------
 # Find Qt5
 find_package(QT NAMES Qt5 REQUIRED COMPONENTS Core)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Gui Network Widgets)
-#find_package(GTest REQUIRED)
+# Pull in google/cppdap and nlohmann/json if we are including the dap interface
+if(ENABLE_DAP)
+  ## Do not use the FetchContent module to get the cppdat project, as the cppdat project
+  ## depends on the nlohmann/json project and it will always unes the LATEST version.
+  ## As we can only target a fixed version of the cppdat project using the the FetchContent
+  ## module, we run the risk of the build breaking if/when the nlohmann/json project becomes
+  ## imcompatable with the cppdat project.
+  ## Instead, we simply directly include a copy of both projects.
 
-# Include the qrc file so the qt windows can find the QTads icon
-set(APP_ICON_RESOURCE_WINDOWS "resources.qrc")
+
+  # The FetchContent module is needed to pull in the google/cppdap project
+  include(FetchContent)
+  # Pull in google/cppdap
+  FetchContent_Declare(google_cppdap
+    GIT_REPOSITORY https://github.com/google/cppdap.git
+    GIT_TAG        252b56807b532533ea7362a4d949758dcb481d2b
+    OVERRIDE_FIND_PACKAGE
+  )
+  # Tell google_cppdap to use an external copy of nlohmann_json rather then
+  # the one it includes, as we can control which commit the external version
+  # is from. The one google_cppdap will always be the latest, even if it cause
+  # problems.
+  set(CPPDAP_USE_EXTERNAL_NLOHMANN_JSON_PACKAGE YES)
+  # A static reference to nlohmann/json. Use OVERRIDE_FIND_PACKAGE so that
+  # when cppdap calls find_package to get nlohmann_json, it can find our
+  # copy of it
+  #FetchContent_Declare(nlohmann_json
+  #  GIT_REPOSITORY https://github.com/nlohmann/json.git
+  #  GIT_TAG        bc889afb4c5bf1c0d8ee29ef35eaaf4c8bef8a5d
+  #  OVERRIDE_FIND_PACKAGE
+  #)
+  #FetchContent_MakeAvailable(nlohmann_json google_cppdap)
+  FetchContent_MakeAvailable(google_cppdap)
+endif()
 
 
 
+# ------------------------------------------------------------------------------
 # Add ALL sources needed to compile QTads.
 # For now, they are in one big block.
-#qt_add_executable(qtads WIN32 MACOSX_BUNDLE
 add_executable(qtads WIN32 
     ${UI_SOURCES}
     ${HDR_SOURCES}
@@ -392,8 +427,10 @@ install(TARGETS qtads
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
-# Incluse the unit tests
-include(unittests/unittests.cmake)
+if(ENABLE_DAP)
+  # Incluse the unit tests
+  include(unittests/unittests.cmake)
+endif()
 
 #enable_testing()
 #add_executable(Setup unittests/Setup.cpp)

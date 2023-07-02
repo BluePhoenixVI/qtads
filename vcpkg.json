@@ -11,6 +11,10 @@
     {
       "name": "gtest",
       "version>=": "1.11.0"
+    },
+    {
+      "name": "nlohmann-json",
+      "version>=": "3.11.2"
     }
   ],
   "builtin-baseline": "288e8bebf4ca67c1f8ebd49366b03650cfd9eb7d"
