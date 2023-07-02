@@ -12,6 +12,8 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+# Disable all deprecation warnings. TADS 3 is old code, and predates them.
+set(CMAKE_WARN_DEPRECATED FALSE)
 
 # Instruct cmake to use moc, rcc, and uic for targets that require them
 set(CMAKE_AUTOMOC ON)
@@ -261,7 +263,10 @@ target_compile_definitions(qtads PRIVATE
     VM_FLAT_POOL
     _M_LE_C11
 )
-
+## Disable the 
+#target_compile_definitions(qtads PRIVATE
+#    -D_CRT_SECURE_NO_WARNINGS
+#)
 # Add the Qt5 libraries
 target_link_libraries(qtads PRIVATE
     Qt::Core
@@ -323,7 +328,9 @@ if(CLANG OR GCC)
         -fno-strict-aliasing
     )
 endif()
-
+#if (CLANG)
+#    target_compile_options(qtads Wno-deprecated-declarations)
+#endif()
 
 if(DISABLEAUDIO)
     target_compile_definitions(qtads PRIVATE
@@ -386,7 +393,7 @@ install(TARGETS qtads
 )
 
 # Incluse the unit tests
-include(unittests/CMakeLists.txt)
+include(unittests/unittests.cmake)
 
 #enable_testing()
 #add_executable(Setup unittests/Setup.cpp)

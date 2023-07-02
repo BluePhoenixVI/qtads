@@ -1,6 +1,8 @@
 
 #include <gtest/gtest.h>
 
+namespace LifecycleTests
+{
 // Demonstrate some basic assertions.
 TEST(HelloTest, BasicAssertions)
 {
@@ -18,8 +20,4 @@ TEST(HelloTest, BasicAssertionsBonus)
     EXPECT_NE(7 * 6, 49);
 }
 
-
-//int main(int argc, char* argv[])
-//{
-//    return 0;
-//}
+} // namespace LifecycleTests
