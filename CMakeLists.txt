@@ -53,7 +53,6 @@ if(ENABLE_DAP)
   FetchContent_Declare(google_cppdap
     GIT_REPOSITORY https://github.com/google/cppdap.git
     GIT_TAG        252b56807b532533ea7362a4d949758dcb481d2b
-    OVERRIDE_FIND_PACKAGE
   )
   # Tell google_cppdap to use an external copy of nlohmann_json rather then
   # the one it includes, as we can control which commit the external version

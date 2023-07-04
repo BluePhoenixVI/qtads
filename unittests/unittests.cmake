@@ -7,8 +7,8 @@ find_package(GTest REQUIRED)
 # Enable the unit tests
 enable_testing()
 # Add the files containing the unit tests
-add_executable(setup unittests/setup.cpp)
+add_executable(setup unittests/setup.cpp unittests/initializationtests.cpp unittests/ProcessHandler.cpp)
 # Add the google test libraries. The GTest::Main defines a main method,
-target_link_libraries(setup GTest::GTest GTest::Main)
+target_link_libraries(setup GTest::GTest GTest::Main cppdap)
 # Instruct cmake to discover the gtests so they will show up in Visual Studio's test explorer
 gtest_discover_tests(setup)
