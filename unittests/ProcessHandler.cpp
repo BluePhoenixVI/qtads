@@ -21,9 +21,8 @@ bool ProcessHandler::StartQTADS(std::string Filename)
 
 
 
-    strcpy_s(CommandLine, Filename.c_str());
-
-
+    strcpy_s(CommandLine, "-d ");
+    strcat_s(CommandLine, Filename.c_str());
 
     CreatePipes(&stdoutReadHandle, &stdoutWriteHandle, &stdinReadHandle, &stdinWriteHandle);
 

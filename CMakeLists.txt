@@ -39,15 +39,8 @@ find_package(QT NAMES Qt5 REQUIRED COMPONENTS Core)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Gui Network Widgets)
 # Pull in google/cppdap and nlohmann/json if we are including the dap interface
 if(ENABLE_DAP)
-  ## Do not use the FetchContent module to get the cppdat project, as the cppdat project
-  ## depends on the nlohmann/json project and it will always unes the LATEST version.
-  ## As we can only target a fixed version of the cppdat project using the the FetchContent
-  ## module, we run the risk of the build breaking if/when the nlohmann/json project becomes
-  ## imcompatable with the cppdat project.
-  ## Instead, we simply directly include a copy of both projects.
-
-
-  # The FetchContent module is needed to pull in the google/cppdap project
+  # The FetchContent module is needed to pull in the google/cppdap project as
+  # the vcpkg package manager does not include it.
   include(FetchContent)
   # Pull in google/cppdap
   FetchContent_Declare(google_cppdap
@@ -55,19 +48,10 @@ if(ENABLE_DAP)
     GIT_TAG        252b56807b532533ea7362a4d949758dcb481d2b
   )
   # Tell google_cppdap to use an external copy of nlohmann_json rather then
-  # the one it includes, as we can control which commit the external version
-  # is from. The one google_cppdap will always be the latest, even if it cause
-  # problems.
+  # the one it includes, as we can pull in a fixed, unchanging version of it
+  # from vcpkg. The one google_cppdap includes will always be the latest, even
+  # if it causes problems. 
   set(CPPDAP_USE_EXTERNAL_NLOHMANN_JSON_PACKAGE YES)
-  # A static reference to nlohmann/json. Use OVERRIDE_FIND_PACKAGE so that
-  # when cppdap calls find_package to get nlohmann_json, it can find our
-  # copy of it
-  #FetchContent_Declare(nlohmann_json
-  #  GIT_REPOSITORY https://github.com/nlohmann/json.git
-  #  GIT_TAG        bc889afb4c5bf1c0d8ee29ef35eaaf4c8bef8a5d
-  #  OVERRIDE_FIND_PACKAGE
-  #)
-  #FetchContent_MakeAvailable(nlohmann_json google_cppdap)
   FetchContent_MakeAvailable(google_cppdap)
 endif()
 
@@ -278,6 +262,7 @@ target_include_directories(qtads PRIVATE
     src
     tads2
     tads3
+    dap
 )
 
 
@@ -328,6 +313,8 @@ if(ENABLE_DAP)
     target_sources(qtads PUBLIC
         dap/dap.cpp
     )
+    # Add the google/cppdap library
+    target_link_libraries(qtads PRIVATE cppdap)
 endif()
 # ------------------------------------------------------------------------------
 

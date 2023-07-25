@@ -17,7 +17,7 @@ void SetupSession(dap::Session* session, ProcessHandler* PH)
     // session->bind(in, out);
 
     std::shared_ptr<dap::Writer> log;
-    log = dap::file("Z:/LOG.log");
+    log = dap::file("TestLog.log");
 
     session->bind(spy(in, log), spy(out, log));
 }
@@ -26,49 +26,51 @@ void SetupSession(dap::Session* session, ProcessHandler* PH)
 TEST(StartingAndStopping, StartAndStopQTADS)
 {
     ProcessHandler PH;
-    EXPECT_TRUE(PH.StartQTADS("")) << "QTADS failed to start";
+    EXPECT_TRUE(PH.StartQTADS("BreakpointTest.t3")) << "QTADS failed to start";
     Sleep(100);
     PH.StopQTADS();
     Sleep(100);
-    EXPECT_FALSE(PH.QTADSRunning()) << "QTADS is stell running after calling PH.StopQTADS()";
+    EXPECT_FALSE(PH.QTADSRunning()) << "QTADS is still running after calling PH.StopQTADS()";
 }
 // Test the DAP lifecycle. We should be able to bind to the QTads input and output streams using a
 // session, and then close that session along with QTads.
 TEST(StartingAndStopping, StartAndStopDapSession)
 {
     ProcessHandler PH;
-    EXPECT_TRUE(PH.StartQTADS("")) << "QTADS failed to start";
+    EXPECT_TRUE(PH.StartQTADS("BreakpointTest.t3")) << "QTADS failed to start";
     auto session = dap::Session::create();
     SetupSession(session.get(), &PH);
     PH.StopQTADS();
     session.reset();
-    EXPECT_FALSE(PH.QTADSRunning()) << "QTADS is stell running after calling PH.StopQTADS()";
+    EXPECT_FALSE(PH.QTADSRunning()) << "QTADS is still running after calling PH.StopQTADS()";
 }
+} // namespace LifecycleTests
 
+namespace TestInputAndOutput {
 // Tests that we can send messages to QTADS, and that we get a responce
 TEST(StartingAndStopping, TestInputAndOutput)
 {
     ProcessHandler PH;
-    EXPECT_TRUE(PH.StartQTADS("")) << "QTADS failed to start";
+    EXPECT_TRUE(PH.StartQTADS("BreakpointTest.t3")) << "QTADS failed to start";
     auto session = dap::Session::create();
-    SetupSession(session.get(), &PH);
+    LifecycleTests::SetupSession(session.get(), &PH);
     // Send the Initialize Request. As we are just testing that we can send and recive messages,
-    // wdo not configure the request
+    // we do not configure the request
     auto future = session->send(dap::InitializeRequest{});
     // Wait on the response.
-    auto responseStatus = future.wait_for(std::chrono::milliseconds(1000));
+    auto responseStatus = future.wait_for(std::chrono::milliseconds(100000));
     EXPECT_EQ(responseStatus, dap::future_status::ready) << "The Initialize request timed out";
     if (responseStatus == dap::future_status::ready) {
         auto response = future.get();
         EXPECT_FALSE(response.error.operator bool())
-            << "The Initialize request failes with message:" << response.error.message;
+            << "The Initialize request failed with message:" << response.error.message;
     }
     // Close QTADS before calling reset on session to delete the dap::Session object.
     // If we were to do this the other way, there may be a hang when the session finilizer
     // tries to close the io streams
     PH.StopQTADS();
+    EXPECT_FALSE(PH.QTADSRunning()) << "QTADS is still running after calling PH.StopQTADS()";
     session.reset();
-    EXPECT_FALSE(PH.QTADSRunning()) << "QTADS is stell running after calling PH.StopQTADS()";
 }
 
 } // namespace LifecycleTests

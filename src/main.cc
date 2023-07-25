@@ -7,6 +7,10 @@
 #include "settings.h"
 #include "sysframe.h"
 
+#include "dapglobals.h" // CHANGES: This file defines the global EnableDAP variable
+#if _DEBUG
+  #include <Windows.h>
+#endif
 // On some platforms, SDL redefines main in order to provide a
 // platform-specific main() implementation.  However, Qt handles this too,
 // so things can get weird.  We need to make sure main is not redefined so
@@ -20,6 +24,13 @@
 
 auto main(int argc, char** argv) -> int
 {
+    // CHANGES: On Windows, wait for the debugger to attach
+//#if _DEBUG
+//    while (!IsDebuggerPresent()) {
+//        _sleep(1);
+//    }
+//    _sleep(1);
+//#endif
     CHtmlResType::add_basic_types();
 #if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
     QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
@@ -34,25 +45,53 @@ auto main(int argc, char** argv) -> int
     // Filename of the game to run.
     QString gameFileName;
 
-    // TODO: Implement the diversion here
     const QStringList& args = app->arguments();
-    if (args.size() == 2) {
-        if (QFile::exists(args.at(1))) {
-            gameFileName = args.at(1);
-        } else if (QFile::exists(args.at(1) + ".gam")) {
-            gameFileName = args.at(1) + ".gam";
-        } else if (QFile::exists(args.at(1) + ".t3")) {
-            gameFileName = args.at(1) + ".t3";
-        } else {
-            qWarning() << "File" << args.at(1) << "not found.";
+
+    // CHANGES: Added a new -d argument. When it is passed QTads starts the DAP extension
+    // If it is passed, we will expect the filename of the story to debug
+    QString tempGameFileName;
+    if (args.size() == 1 || args.size() == 2) {
+        QString tempArgument = args.at(0);
+        // The -d argument was passed first
+        if (tempArgument == "-d" || tempArgument == "/d") {
+            EnableDAP = true;
+            // If there was three args, the gamefile name is the third
+            if (args.size() == 2) {
+                tempGameFileName = args.at(1);
+            }
+        } else if (args.size() == 2) { // The -d argument was passed second
+            tempArgument = args.at(1);
+            EnableDAP = (tempArgument == "-d" || tempArgument == "/d");
         }
     }
+
+    // Changed args.at(1) to tempGameFileName
+    if (!tempGameFileName.isEmpty()) {
+        if (QFile::exists(tempGameFileName)) {
+            gameFileName = tempGameFileName;
+        } else if (QFile::exists(tempGameFileName + ".gam")) {
+            gameFileName = tempGameFileName + ".gam";
+        } else if (QFile::exists(tempGameFileName + ".t3")) {
+            gameFileName = tempGameFileName + ".t3";
+        } else {
+            qWarning() << "File" << tempGameFileName << "not found.";
+        }
+    } else if (EnableDAP == false) {
+        qWarning() << "The -d was passed but not the filename of the game to debug.";
+    }
+    // END CHANGES:
+
 
     if (gameFileName.isEmpty() and app->settings().askForGameFile) {
         gameFileName = QFileDialog::getOpenFileName(
             nullptr, QObject::tr("Choose the TADS game you wish to run"), {},
             QObject::tr("TADS Games") + "(*.gam *.Gam *.GAM *.t3 *.T3)");
     }
+    // END CHANGES:
+
+    // CHANGES: Added a new -d argument. When it is passed QTads starts the DAP extension
+    // TODO: Start the DAP
+    // END CHANGES:
 
 #ifndef NO_AUDIO
     if (not initSound()) {
